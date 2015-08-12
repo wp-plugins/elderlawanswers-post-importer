@@ -71,13 +71,17 @@ class rssPostImporter {
 			'feeds_api_key' => false,
 			'frequency' => 0,
 			'post_template' => "{\$content}",
-			'post_status' => 'publish',
-			'author_id' => 1,
-			'allow_comments' => 'open',
+			'ela_post_status' => 'publish',
+			'ela_author_id' => 1,
+			'ela_allow_comments' => 'open',
+			'asnp_post_status' => 'publish',
+			'asnp_author_id' => 1,
+			'asnp_allow_comments' => 'open',
 			'block_indexing' => false,
 			'nofollow_outbound' => false,
 			'keywords' => array(),
 			'import_images_locally' => false,
+			'role' => 'none',
 			'disable_thumbnail' => true
 		);
 
@@ -134,7 +138,7 @@ class rssPostImporter {
 	}
 
 	/**
-   * Always returns true, the server checks API key validity
+   * Always returns true   
    * It is used throughout the codebase but should be removed
    * at some point
 	 * 
@@ -159,4 +163,11 @@ class rssPostImporter {
 		return array_merge($settings_link, $links);
 	}
 
+  public function can_see_ela_settings() {
+    return ($this->options['settings']['role'] === 'ela' || $this->options['settings']['role'] === 'dual');
+  }
+
+  public function can_see_asnp_settings() {
+    return ($this->options['settings']['role'] === 'asnp' || $this->options['settings']['role'] === 'dual');
+  }
 }

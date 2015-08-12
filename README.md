@@ -2,10 +2,10 @@
 
 * Contributors: ElderLawAnswers
 * Author link: http://www.elderlawanswers.com/
-* Tags: rss, legal, import, feed, autoblog, attorney, aggregation, expert content, elder, law, syndication, content, feed import, feed to post, rss to post, content curation
+* Tags: rss, legal, import, feed, autoblog, attorney, aggregation, expert content, elder, law, syndication, content, feed import, feed to post, rss to post, content curation, special needs
 * Requires at least: 3.5
-* Tested up to: 4.2.2
-* Stable tag: 1.0.0
+* Tested up to: 4.2.4
+* Stable tag: 1.1.0
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,8 @@ ElderLawAnswers Post Importer allows you to import expert elder law content to e
 **Get your Client E-Newsletter Articles on your Firm's Website**
 
 The ElderLawAnswers E-Newsletter Builder allows you to include the latest news as well as choose the articles most relevant to your clientele from our extensive library.
+
+Now available to members of [SpecialNeedsAnswers](http://specialneedsanswers.com)!
 
 **Features include:**
 
@@ -57,4 +59,12 @@ We've created this tool to simplify your practice development efforts. Once inst
 
 7. Click Save
 
-7. Receive regular content updates as well as articles included in your newsletters
+8. Receive regular content updates as well as articles included in your newsletters
+
+## Changelog
+
+### 1.0.0
+* Initial Release
+
+### 1.1.0
+* Adds support for Academy of Special Needs Planners content

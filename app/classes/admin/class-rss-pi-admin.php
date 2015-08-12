@@ -130,20 +130,28 @@ class rssPIAdmin {
 
     // Add special route to be used for externally triggered post importing
     add_filter( 'rewrite_rules_array',array($this, 'ela_rss_add_import_trigger_url') );
+    add_filter( 'rewrite_rules_array',array($this, 'ela_rss_add_role_update_trigger_url') );
     add_filter( 'query_vars',array($this, 'ela_rss_add_query_params') );
     add_filter( 'template_include', array( $this, 'ela_rss_template_include'));
-    add_action( 'wp_loaded',array($this, 'ela_rss_flush_rules_for_import') );
+    add_action( 'wp_loaded',array($this, 'ela_rss_flush_rules') );
 	}
 
   /**
    * Flush rules if import rule not yet included
    */
-  function ela_rss_flush_rules_for_import() {
+  function ela_rss_flush_rules() {
     $rules = get_option('rewrite_rules');
 
     //Do not uncomment the following line except in development
     //unset($rules['ela-post-import/id/(\d+(?:-\d+)*)$']);
     if(!isset($rules['ela-post-import/id/(\d+(?:-\d+)*)$'])) {
+      global $wp_rewrite;
+      $wp_rewrite->flush_rules();
+    }
+
+    //Do not uncomment the following line except in development
+    //unset($rules['ela-post-import/role-update/(\w+)$']);
+    if(!isset($rules['ela-post-import/role-update/(\w+)*)$'])) {
       global $wp_rewrite;
       $wp_rewrite->flush_rules();
     }
@@ -160,15 +168,26 @@ class rssPIAdmin {
   }
 
   /**
+   * Add role update trigger url
+   */
+  public function ela_rss_add_role_update_trigger_url($rules) {
+    $new_rules = array();
+    //query var ela-post-import will be set to import as long as the route is corrent, ids pass through unchanged
+    $new_rules['ela-post-import/role-update/(\w+)$'] = 'index.php?ela-post-import=role-update&new-role=$matches[1]';
+    return $new_rules + $rules;
+  }
+
+  /**
    * Add query params so WP knows to look for them
    */
   public function ela_rss_add_query_params($params) {
     array_push($params, 'ela-post-import', 'ela-post-ids');
+    array_push($params, 'ela-post-import', 'new-role');
     return $params;
   }
 
   /**
-   * Hook into the template include trigger to actually perform an import
+   * Hook into the template include trigger to actually perform an import or update a role
    */
   public function ela_rss_template_include($template) {
     $import_page = get_query_var( 'ela-post-import' );
@@ -177,6 +196,34 @@ class rssPIAdmin {
       $engine = new rssPIEngine();
       $engine->import_feed($ids);
       echo $ids . ' imported';
+    }
+    elseif($import_page === 'role-update') {
+      global $rss_post_importer;
+      $this->options = $rss_post_importer->options;
+      $new_role = get_query_var('new-role');
+      $current_role = $this->options['settings']['role'];
+
+      if($new_role === 'dual' && $current_role === 'asnp') {
+        $this->options['settings']['ela_post_status'] = $this->options['settings']['asnp_post_status'];
+        $this->options['settings']['ela_category'] = $this->options['settings']['asnp_category'];
+        $this->options['settings']['ela_author_id'] = $this->options['settings']['asnp_author_id'];
+        $this->options['settings']['ela_allow_comments'] = $this->options['settings']['asnp_allow_comments'];
+      }
+      elseif($new_role === 'dual' && $current_role === 'ela') {
+        $this->options['settings']['asnp_post_status'] = $this->options['settings']['ela_post_status'];
+        $this->options['settings']['asnp_category'] = $this->options['settings']['ela_category'];
+        $this->options['settings']['asnp_author_id'] = $this->options['settings']['ela_author_id'];
+        $this->options['settings']['asnp_allow_comments'] = $this->options['settings']['ela_allow_comments'];
+      }
+      //update role
+      $this->options['settings']['role'] = $new_role;
+			// update options
+			update_option('rss_pi_feeds', array(
+				'feeds' => $this->options['feeds'],
+				'settings' => $this->options['settings'],
+				'latest_import' => $this->options['latest_import'],
+				'imports' => $this->options['imports']
+			));
     }
     else {
       return $template;
@@ -248,64 +295,30 @@ class rssPIAdmin {
 
 		// display a success message
 		if( isset($_GET['settings-updated']) || isset($_GET['invalid_api_key']) || isset($_GET['import']) && $_GET['settings-updated'] ) {
-?>
-		<div id="message" class="updated">
-<?php
+		  echo '<div id="message" class="updated">';
 			if( isset($_GET['settings-updated']) && $_GET['settings-updated'] ) {
-?>
-			<p><strong><?php _e('Settings saved.') ?></strong></p>
-<?php
+        echo '<p><strong>Settings saved.</strong></p>';
 			}
 			if( isset($_GET['imported']) && $_GET['imported'] ) {
 				$imported = intval($_GET['imported']);
-?>
-			<p><strong><?php printf( _n( '%s new post imported.', '%s new posts imported.', $imported, 'rss_pi' ), $imported ); ?></strong></p>
-<?php
+        echo "<p><strong>$imported new post imported.</strong></p>";
 			}
-?>
-		</div>
-<?php
+      echo '</div>';
 			// import feeds via AJAX
 			if( isset($_GET['import']) ) {
-?>
-<script type="text/javascript">
-<?php
-$ids = array();
-if ( is_array($this->options['feeds']) ) :
-//	$ids = array_keys($this->options['feeds'])
-	foreach ($this->options['feeds'] as $f) :
-		$ids[] = $f['id'];
-	endforeach;
-endif;
-?>
-feeds.set(<?php echo json_encode($ids); ?>);
-</script>
-<?php
+        echo '<script type="text/javascript">';
+        $ids = array();
+        if ( is_array($this->options['feeds']) ) :
+        //	$ids = array_keys($this->options['feeds'])
+          foreach ($this->options['feeds'] as $f) :
+            $ids[] = $f['id'];
+          endforeach;
+        endif;
+        $ids_string = json_encode($ids);
+        echo "feeds.set($ids_string))";
+        echo '</script>';
 			}
 		}
-
-		// display a error message
-		if( isset($_GET['message']) && $_GET['message'] > 1 ) {
-?>
-		<div id="message" class="error">
-<?php
-			switch ( $_GET['message'] ) {
-				case 2:
-				{
-?>
-			<p><strong><?php _e('Invalid API key!', 'rss_api'); ?></strong></p>
-<?php
-				}
-				break;
-			}
-?>
-		</div>
-<?php
-		}
-
-		// load the form processor first
-//		$this->processor->process();
-
 		// it'll process any submitted form data
 		// reload the options just in case
 		$this->load_options();
@@ -361,26 +374,9 @@ feeds.set(<?php echo json_encode($ids); ?>);
     //print_r('ajax_import');
     //print_r($_POST);
 
-//		$imported = $this->processor->import();
-//		wp_send_json_success(array('imported'=>$imported));
-
-//		$engine = new rssPIEngine();
-//		$imported = $engine->import_feed();
-
 		// if there's nothing for processing or invalid data, bail
 		if ( ! isset($_POST['feed']) ) {
 			wp_send_json_error(array('message'=>'no feed provided'));
-		}
-
-		$_found = false;
-		foreach ( $this->options['feeds'] as $id => $f ) {
-			if ( $f['id'] == $_POST['feed'] ) {
-				$_found = $id;
-				break;
-			}
-		}
-		if ( $_found === false ) {
-			wp_send_json_error(array('message'=>'wrong feed id provided'));
 		}
 
 		// TODO: make this better
@@ -440,7 +436,7 @@ feeds.set(<?php echo json_encode($ids); ?>);
 	}
 
 	/**
-	 * Disable the user dropdwon for each feed
+	 * Disable the user dropdown for each feed
 	 * 
 	 * @param string $output The html of the select dropdown
 	 * @return string
@@ -522,46 +518,4 @@ feeds.set(<?php echo json_encode($ids); ?>);
 		));
 		return $cat;
 	}
-
-	function rss_pi_tags_dropdown($fid, $seleced_tags) {
-
-		if ($tags = get_tags(array('orderby' => 'name', 'hide_empty' => false))) {
-
-			echo '<select name="' . $fid . '-tags_id[]" id="tag" class="postform">';
-
-			foreach ($tags as $tag) {
-				$strsel = "";
-				if (!empty($seleced_tags)) {
-
-					if ($seleced_tags[0] == $tag->term_id) {
-						$strsel = "selected='selected'";
-					}
-				}
-				echo '<option value="' . $tag->term_id . '" ' . $strsel . '>' . $tag->name . '</option>';
-			}
-			echo '</select> ';
-		}
-	}
-
-	function rss_pi_tags_checkboxes($fid, $seleced_tags) {
-
-		$tags = get_tags(array('hide_empty' => false));
-		if ($tags) {
-			$checkboxes = "<ul>";
-
-			foreach ($tags as $tag) :
-				$strsel = "";
-				if (in_array($tag->term_id, $seleced_tags))
-					$strsel = "checked='checked'";
-
-				$checkboxes .=
-						'<li><label for="tag-' . $tag->term_id . '">
-								<input type="checkbox" name="' . $fid . '-tags_id[]" value="' . $tag->term_id . '" id="tag-' . $tag->term_id . '" ' . $strsel . ' />' . $tag->name . '
-							</label></li>';
-			endforeach;
-			$checkboxes .= "</ul>";
-			print $checkboxes;
-		}
-	}
-
 }

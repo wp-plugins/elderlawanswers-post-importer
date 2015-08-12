@@ -5,7 +5,7 @@
   Plugin URI: http://attorney.elderlawanswers.com/home/wordpress-plugin
   Description: This plugin allows you to import posts from the ElderLawAnswers RSS feed for use as content in your Wordpress site
   Author: elderlawanswers
-  Version: 1.0.0
+  Version: 1.1.0
   Author URI: http://www.elderlawanswers.com/
   License: GPLv2 or later
   License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -44,15 +44,15 @@ if (!defined('RSS_PI_BASENAME')) {
 }
 
 if (!defined('ELA_RSS_PI_VERSION')) {
-  define('ELA_RSS_PI_VERSION', '1.0.0');
+  define('ELA_RSS_PI_VERSION', '1.1.0');
 }
 
 if (!defined('ELA_RSS_PI_BASE_URL')) {
-  define('ELA_RSS_PI_BASE_URL', 'http://www.elderlawanswers.com/news-and-information/rss-full/type/ela');
+  define('ELA_RSS_PI_BASE_URL', 'http://test.www.elderlawanswers.com/news-and-information/rss-full/');
 }
 
 if (!defined('ELA_ATTORNEY_SIGNUP_URL')) {
-  define('ELA_ATTORNEY_SIGNUP_URL', 'http://test.attorney.elderlawanswers.com/');
+  define('ELA_ATTORNEY_SIGNUP_URL', 'http://attorney.elderlawanswers.com/');
 }
 
 // helper classes

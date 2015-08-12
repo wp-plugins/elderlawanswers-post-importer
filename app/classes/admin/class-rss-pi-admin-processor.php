@@ -86,24 +86,36 @@ class rssPIAdminProcessor {
 	 */
 	private function process_settings() {
 
+    global $rss_post_importer;
+
+    //first, determine if the role will need updating
+    $role = $rss_post_importer->options['settings']['role'];
+    if($_POST['feeds_api_key'] !== $rss_post_importer->options['feeds_api_key']) {
+      $url = ELA_RSS_PI_BASE_URL . 'type/role-check/token/' . urlencode($_POST['feeds_api_key']) . '/version/' . ELA_RSS_PI_VERSION;
+      $role = trim(file_get_contents($url));
+    }
+
 		// Get selected settings for all imported posts
 		$settings = array(
 			'frequency' => $_POST['frequency'],
 			'feeds_api_key' => $_POST['feeds_api_key'],
 			'post_template' => stripslashes_deep($_POST['post_template']),
-			'post_status' => $_POST['post_status'],
-			'author_id' => $_POST['author_id'],
-			'allow_comments' => $_POST['allow_comments'],
+			'ela_post_status' => $_POST['ela_post_status'],
+			'ela_author_id' => $_POST['ela_author_id'],
+			'ela_allow_comments' => $_POST['ela_allow_comments'],
 			'block_indexing' => $_POST['block_indexing'],
 			'nofollow_outbound' => $_POST['nofollow_outbound'],
 			'enable_logging' => true,
 			'import_images_locally' => $_POST['import_images_locally'],
 			'disable_thumbnail' => $_POST['disable_thumbnail'],
-			'category' => $_POST['category_id'],
+			'ela_category' => $_POST['ela_category_id'],
+			'asnp_category' => $_POST['asnp_category_id'],
+			'asnp_post_status' => $_POST['asnp_post_status'],
+			'asnp_author_id' => $_POST['asnp_author_id'],
+			'asnp_allow_comments' => $_POST['asnp_allow_comments'],
+      'role' => $role,
 			'keywords' => array()
 		);
-
-		global $rss_post_importer;
 
 		// check if submitted api key is valid
 		$this->is_key_valid = $rss_post_importer->is_valid_key($settings['feeds_api_key']);
@@ -144,9 +156,17 @@ class rssPIAdminProcessor {
         'id' => 0,
         'url' => (ELA_RSS_PI_BASE_URL),
         'name' => '',
-        'author_id' => $_POST['author_id'],
-        'category_id' => (isset($_POST['category_id'])) ? $_POST['category_id'] : '',
-        'tags_id' => (isset($_POST[$id . '-tags_id'])) ? $_POST[$id . '-tags_id'] : ''
+        'author_id' => $_POST['ela_author_id'],
+        'category_id' => (isset($_POST['ela_category_id'])) ? $_POST['ela_category_id'] : '',
+        'tags_id' => (isset($_POST['ela-tags_id'])) ? $_POST['ela-tags_id'] : ''
+      ));
+      array_push($feeds, array(
+        'id' => 1,
+        'url' => (ASNP_RSS_PI_BASE_URL),
+        'name' => '',
+        'author_id' => $_POST['asnp_author_id'],
+        'category_id' => (isset($_POST['asnp_category_id'])) ? $_POST['asnp_category_id'] : '',
+        'tags_id' => (isset($_POST['asnp-tags_id'])) ? $_POST['asnp-tags_id'] : ''
       ));
     }
 

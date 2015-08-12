@@ -39,7 +39,7 @@ class rssPIParser {
 		global $rss_post_importer;
 
 		// get the saved template
-		$post_template = ($rss_post_importer->options['settings']['post_template'] == false) ? '{$content} Source: {$feed_title}' : $rss_post_importer->options['settings']['post_template'];
+		$post_template = ($rss_post_importer->options['settings']['post_template'] == false) ? '{$content}' : $rss_post_importer->options['settings']['post_template'];
 
 		// get the content
 		$c = $item->get_content() != "" ? $item->get_content() : $item->get_description();
