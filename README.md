@@ -5,7 +5,7 @@
 * Tags: rss, legal, import, feed, autoblog, attorney, aggregation, expert content, elder, law, syndication, content, feed import, feed to post, rss to post, content curation, special needs
 * Requires at least: 3.5
 * Tested up to: 4.2.4
-* Stable tag: 1.1.0
+* Stable tag: 1.1.1
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
