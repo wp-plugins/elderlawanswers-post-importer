@@ -44,11 +44,11 @@ if (!defined('RSS_PI_BASENAME')) {
 }
 
 if (!defined('ELA_RSS_PI_VERSION')) {
-  define('ELA_RSS_PI_VERSION', '1.1.0');
+  define('ELA_RSS_PI_VERSION', '1.1.1');
 }
 
 if (!defined('ELA_RSS_PI_BASE_URL')) {
-  define('ELA_RSS_PI_BASE_URL', 'http://test.www.elderlawanswers.com/news-and-information/rss-full/');
+  define('ELA_RSS_PI_BASE_URL', 'http://www.elderlawanswers.com/news-and-information/rss-full/');
 }
 
 if (!defined('ELA_ATTORNEY_SIGNUP_URL')) {
