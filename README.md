@@ -68,3 +68,6 @@ We've created this tool to simplify your practice development efforts. Once inst
 
 ### 1.1.0
 * Adds support for Academy of Special Needs Planners content
+
+### 1.1.1
+* Fixes typo in 1.1.0
